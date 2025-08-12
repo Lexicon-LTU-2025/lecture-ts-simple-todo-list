@@ -1,5 +1,6 @@
 import './style.css';
 import { dummyTodos } from './data';
+import { v4 as generateId } from 'uuid';
 
 // Use `import type` when importing interfaces or types to tell TS that they are only needed in development, so they won't be included in the compile JS and won't trigger unnecessary runtime imports.
 import type { ITodo } from './types';
@@ -11,14 +12,30 @@ app.innerHTML = /*html*/ `
   <main>
     <form class="add-todo-form">
       <label for="title-input">Add new Todo</label>
-      <input class="new-todo-title" id="title-input" type="text">
+      <input class="new-todo-title" id="title-input" required type="text">
       <button class="add-btn" type="submit">Add</button>
     </form>
     <section class="todo-list"></section>
   </main>
 `;
 
+const formEl = document.querySelector<HTMLFormElement>('.add-todo-form')!;
 const todoList = document.querySelector<HTMLElement>('.todo-list')!;
+const inputEl = document.querySelector<HTMLInputElement>('#title-input')!;
+
+formEl.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const newTodo: ITodo = {
+    completed: false,
+    id: generateId(),
+    title: inputEl.value,
+  };
+
+  const newTodoEl = createNewTodoEl(newTodo);
+  todoList.insertAdjacentElement('afterbegin', newTodoEl);
+  inputEl.value = '';
+});
 
 populateTodoListWithDummys();
 
