@@ -9,3 +9,7 @@
   border: none;
   cursor: pointer;
 }
+
+.todo.completed p {
+  text-decoration: line-through;
+}

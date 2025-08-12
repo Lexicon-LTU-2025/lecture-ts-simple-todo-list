@@ -20,9 +20,10 @@ app.innerHTML = /*html*/ `
 `;
 
 const formEl = document.querySelector<HTMLFormElement>('.add-todo-form')!;
-const todoList = document.querySelector<HTMLElement>('.todo-list')!;
+const todoListEl = document.querySelector<HTMLElement>('.todo-list')!;
 const inputEl = document.querySelector<HTMLInputElement>('#title-input')!;
 
+// It is possible to have inline event handlers
 formEl.addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -33,11 +34,12 @@ formEl.addEventListener('submit', (e) => {
   };
 
   const newTodoEl = createNewTodoEl(newTodo);
-  todoList.insertAdjacentElement('afterbegin', newTodoEl);
+  todoListEl.insertAdjacentElement('afterbegin', newTodoEl);
   inputEl.value = '';
 });
 
-todoList.addEventListener('click', (e) => handleOnClick(e));
+// But I prefer to externalize them.
+todoListEl.addEventListener('click', (e) => handleOnClick(e));
 
 populateTodoListWithDummys();
 
@@ -50,10 +52,15 @@ function createNewTodoEl(todo: ITodo): HTMLElement {
 
   // Deconstructing an object, same as above but in one line basically.
   const { completed, id, title } = todo;
+  const classes = ['todo'];
+
+  if (completed) {
+    classes.push('completed');
+  }
 
   const newTodoEl = document.createElement('article');
   newTodoEl.id = String(id); // Parse whatever inside to a string
-  newTodoEl.classList.add('todo');
+  newTodoEl.classList.add(...classes); // Spread syntax, 'spreads out all the elements'
 
   newTodoEl.innerHTML = /*html*/ `
     <p class="todo-title">${title}</p>
@@ -91,14 +98,25 @@ function handleOnClick(event: MouseEvent): void {
 function populateTodoListWithDummys(): void {
   dummyTodos.forEach((t) => {
     // appendChild would work fine as well
-    todoList.insertAdjacentElement('beforeend', createNewTodoEl(t));
+    todoListEl.insertAdjacentElement('beforeend', createNewTodoEl(t));
   });
 }
 
 function removeTodo(todoEl: HTMLElement): void {
-  todoList.removeChild(todoEl);
+  todoListEl.removeChild(todoEl);
 }
 
 function updateTodo(todoEl: HTMLElement): void {
-  
+  const completed = !todoEl.classList.contains('completed');
+  const id = todoEl.id;
+  const title = todoEl.querySelector<HTMLParagraphElement>('.todo-title')!.innerText;
+
+  const updatedTodo: ITodo = {
+    completed,
+    id,
+    title,
+  };
+
+  const updatedTodoEl = createNewTodoEl(updatedTodo);
+  todoListEl.replaceChild(updatedTodoEl, todoEl);
 }
