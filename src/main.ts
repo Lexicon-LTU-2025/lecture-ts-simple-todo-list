@@ -1,4 +1,4 @@
-import './style.css';
+import './css/style.css';
 import { dummyTodos } from './data';
 import { v4 as generateId } from 'uuid';
 
@@ -37,6 +37,8 @@ formEl.addEventListener('submit', (e) => {
   inputEl.value = '';
 });
 
+todoList.addEventListener('click', (e) => handleOnClick(e));
+
 populateTodoListWithDummys();
 
 // #################### Functions below ####################
@@ -55,15 +57,48 @@ function createNewTodoEl(todo: ITodo): HTMLElement {
 
   newTodoEl.innerHTML = /*html*/ `
     <p class="todo-title">${title}</p>
-    <div class="action-buttons"></div>
+    <div class="action-buttons">
+      <button class="complete-btn" type="button">
+        <span class="material-symbols-outlined">
+          ${completed ? 'check_box' : 'check_box_outline_blank'}
+        </span>
+      </button>
+      <button class="remove-btn" type="button">
+        <span class="material-symbols-outlined">delete</span>
+      </button>
+    </div>
   `;
 
   return newTodoEl;
 }
 
-function populateTodoListWithDummys() {
+function handleOnClick(event: MouseEvent): void {
+  const target = event.target;
+
+  // Need this syntax to be typesafe. Looks odd but it gets the job done. TS can't know before the actual event is triggered.
+  if (!(target instanceof HTMLElement)) return;
+
+  const todoEl = target.closest<HTMLElement>('.todo');
+  if (todoEl === null) return;
+
+  // If no ancestor with the specific class exists, that if check will be false and will move on to the next if check.
+  if (target.closest('.remove-btn')) return removeTodo(todoEl);
+  if (target.closest('.complete-btn')) return updateTodo(todoEl);
+
+  console.log(todoEl);
+}
+
+function populateTodoListWithDummys(): void {
   dummyTodos.forEach((t) => {
     // appendChild would work fine as well
     todoList.insertAdjacentElement('beforeend', createNewTodoEl(t));
   });
+}
+
+function removeTodo(todoEl: HTMLElement): void {
+  todoList.removeChild(todoEl);
+}
+
+function updateTodo(todoEl: HTMLElement): void {
+  
 }

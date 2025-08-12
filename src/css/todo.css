@@ -1,0 +1,11 @@
+.todo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.todo button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
