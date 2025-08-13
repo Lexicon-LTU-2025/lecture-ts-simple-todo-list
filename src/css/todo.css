@@ -1,4 +1,8 @@
 .todo {
+  border: 2px solid var(--main-color);
+  border-radius:var(--border-radius);
+  padding: 0.8rem;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -10,6 +14,14 @@
   cursor: pointer;
 }
 
+.todo button:disabled {
+  visibility: hidden;
+}
+
 .todo.completed p {
   text-decoration: line-through;
+}
+
+.material-symbols-outlined {
+  color: var(--main-color);
 }

@@ -1,0 +1,37 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* :root works as well and means the same thing as the html element */
+html {
+  /* defined it with two dashes */
+  --border-radius: 0.5rem;
+  --main-color: #2a75bb;
+  --secondary-color: #ffcb05;
+}
+
+body {
+  background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png');
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  background-size: 150px;
+  height: 100vh;
+  padding: 2rem;
+  width: 80vw;
+}
+
+h1 {
+  color: var(--secondary-color);
+  font-family: 'Press Start 2P', cursive;
+  margin-bottom: 1rem;
+
+  /* use a css variable with the keyword 'var' */
+  text-shadow: 2px 2px var(--main-color);
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
