@@ -36,12 +36,14 @@ formEl.addEventListener('submit', (e) => {
   const newTodoEl = createNewTodoEl(newTodo);
   todoListEl.insertAdjacentElement('afterbegin', newTodoEl);
   inputEl.value = '';
+  updateMoveButtonState();
 });
 
-// But I prefer to externalize them.
+// But I prefer to externalize them ( event handler ).
 todoListEl.addEventListener('click', (e) => handleOnClick(e));
 
 populateTodoListWithDummys();
+updateMoveButtonState();
 
 // #################### Functions below ####################
 
@@ -70,8 +72,19 @@ function createNewTodoEl(todo: ITodo): HTMLElement {
           ${completed ? 'check_box' : 'check_box_outline_blank'}
         </span>
       </button>
+      
       <button class="remove-btn" type="button">
         <span class="material-symbols-outlined">delete</span>
+      </button>
+
+      <button class="move-up-btn" type="button">
+        <span class="material-symbols-outlined">
+          arrow_upward
+        </span>
+      </button>
+
+      <button class="move-down-btn" type="button">
+        <span class="material-symbols-outlined">arrow_downward</span>
       </button>
     </div>
   `;
@@ -91,8 +104,20 @@ function handleOnClick(event: MouseEvent): void {
   // If no ancestor with the specific class exists, that if check will be false and will move on to the next if check.
   if (target.closest('.remove-btn')) return removeTodo(todoEl);
   if (target.closest('.complete-btn')) return updateTodo(todoEl);
+  if (target.closest('.move-up-btn')) return moveElement(todoEl, 'up');
+  if (target.closest('.move-down-btn')) return moveElement(todoEl, 'down');
+}
 
-  console.log(todoEl);
+function moveElement(todoEl: HTMLElement, direction: 'up' | 'down'): void {
+  if (direction === 'up') {
+    const prevEl = todoEl.previousElementSibling!;
+    todoListEl.insertBefore(todoEl, prevEl);
+  } else {
+    const nextEl = todoEl.nextElementSibling!;
+    todoListEl.insertBefore(nextEl, todoEl);
+  }
+
+  updateMoveButtonState();
 }
 
 function populateTodoListWithDummys(): void {
@@ -104,6 +129,20 @@ function populateTodoListWithDummys(): void {
 
 function removeTodo(todoEl: HTMLElement): void {
   todoListEl.removeChild(todoEl);
+  updateMoveButtonState();
+}
+
+function updateMoveButtonState(): void {
+  const todos = todoListEl.children;
+  if (!todos || todos.length === 0) return;
+
+  Array.from(todos).forEach((todo, index, arr) => {
+    const moveUpBtn = todo.querySelector<HTMLButtonElement>('.move-up-btn')!;
+    const moveDownBtn = todo.querySelector<HTMLButtonElement>('.move-down-btn')!;
+
+    moveUpBtn.disabled = index === 0;
+    moveDownBtn.disabled = index === arr.length - 1;
+  });
 }
 
 function updateTodo(todoEl: HTMLElement): void {
