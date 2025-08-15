@@ -44,7 +44,6 @@ formEl.addEventListener('submit', (e) => {
 todoListEl.addEventListener('click', (e) => handleOnClick(e));
 
 populateExistingTodos();
-updateMoveButtonState();
 
 // #################### Functions below ####################
 
@@ -145,11 +144,31 @@ function moveElement(todoEl: HTMLElement, direction: 'up' | 'down'): void {
 }
 
 async function populateExistingTodos(): Promise<void> {
-  const todos = await fetchTodos();
+  renderLoadingSpinner();
 
-  todos.forEach((t) => {
-    todoListEl.insertAdjacentElement('beforeend', createNewTodoEl(t));
-  });
+  setTimeout(async () => {
+    const todos = await fetchTodos();
+    removeLoadingSpinner();
+
+    todos.forEach((t) => {
+      todoListEl.insertAdjacentElement('beforeend', createNewTodoEl(t));
+    });
+
+    updateMoveButtonState();
+  }, 2000);
+}
+
+function renderLoadingSpinner() {
+  const loadingSpinnerEl = document.createElement('div');
+  loadingSpinnerEl.classList.add('loader-wrapper');
+  loadingSpinnerEl.innerHTML = `<div class="loader"></div>`;
+
+  todoListEl.appendChild(loadingSpinnerEl);
+}
+
+function removeLoadingSpinner() {
+  const loadingSpinnerEl = document.querySelector<HTMLElement>('.loader-wrapper')!;
+  todoListEl.removeChild(loadingSpinnerEl);
 }
 
 function removeTodo(todoEl: HTMLElement): void {
