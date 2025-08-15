@@ -42,7 +42,7 @@ formEl.addEventListener('submit', (e) => {
 // But I prefer to externalize them ( event handler ).
 todoListEl.addEventListener('click', (e) => handleOnClick(e));
 
-populateTodoListWithDummys();
+populateExistingTodos();
 updateMoveButtonState();
 
 // #################### Functions below ####################
@@ -92,6 +92,17 @@ function createNewTodoEl(todo: ITodo): HTMLElement {
   return newTodoEl;
 }
 
+async function fetchTodos(): Promise<ITodo[]> {
+  const res = await fetch('https://jsonplaceholder.typicode.com/todos');
+
+  if (res.ok === false) {
+    throw new Error('Todos could not be fetched');
+  }
+
+  const todos = (await res.json()) as ITodo[];
+  return todos.slice(0, 5);
+}
+
 function handleOnClick(event: MouseEvent): void {
   const target = event.target;
 
@@ -120,9 +131,10 @@ function moveElement(todoEl: HTMLElement, direction: 'up' | 'down'): void {
   updateMoveButtonState();
 }
 
-function populateTodoListWithDummys(): void {
-  dummyTodos.forEach((t) => {
-    // appendChild would work fine as well
+async function populateExistingTodos(): Promise<void> {
+  const todos = await fetchTodos();
+
+  todos.forEach((t) => {
     todoListEl.insertAdjacentElement('beforeend', createNewTodoEl(t));
   });
 }
