@@ -5,6 +5,7 @@ import { v4 as generateId } from 'uuid';
 // Use `import type` when importing interfaces or types to tell TS that they are only needed in development, so they won't be included in the compile JS and won't trigger unnecessary runtime imports.
 import type { ITodo } from './types';
 import { TodosKey } from './constants';
+import { TodoList } from './todoList.class';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
@@ -24,23 +25,9 @@ const formEl = document.querySelector<HTMLFormElement>('.add-todo-form')!;
 const todoListEl = document.querySelector<HTMLElement>('.todo-list')!;
 const inputEl = document.querySelector<HTMLInputElement>('#title-input')!;
 
-// It is possible to have inline event handlers
-formEl.addEventListener('submit', (e) => {
-  e.preventDefault();
+const todosList = new TodoList();
 
-  const newTodo: ITodo = {
-    completed: false,
-    id: generateId(),
-    title: inputEl.value,
-  };
-
-  const newTodoEl = createNewTodoEl(newTodo);
-  todoListEl.insertAdjacentElement('afterbegin', newTodoEl);
-  inputEl.value = '';
-  updateMoveButtonState();
-});
-
-// But I prefer to externalize them ( event handler ).
+formEl.addEventListener('submit', (e) => handleOnSubmit(e));
 todoListEl.addEventListener('click', (e) => handleOnClick(e));
 
 populateExistingTodos();
@@ -92,29 +79,6 @@ function createNewTodoEl(todo: ITodo): HTMLElement {
   return newTodoEl;
 }
 
-async function fetchTodos(): Promise<ITodo[]> {
-  const todosFromLS = localStorage.getItem(TodosKey);
-
-  if (todosFromLS === null) {
-    console.log('Todos from API');
-    const res = await fetch('https://jsonplaceholder.typicode.com/todos');
-
-    if (res.ok === false) {
-      throw new Error('Todos could not be fetched');
-    }
-
-    const todos = (await res.json()) as ITodo[];
-    const defaultTodos = todos.slice(0, 5);
-
-    localStorage.setItem(TodosKey, JSON.stringify(defaultTodos));
-    return defaultTodos;
-  }
-
-  console.log('Todos from LS');
-  const parsedTodos = JSON.parse(todosFromLS) as ITodo[];
-  return parsedTodos;
-}
-
 function handleOnClick(event: MouseEvent): void {
   const target = event.target;
 
@@ -129,6 +93,21 @@ function handleOnClick(event: MouseEvent): void {
   if (target.closest('.complete-btn')) return updateTodo(todoEl);
   if (target.closest('.move-up-btn')) return moveElement(todoEl, 'up');
   if (target.closest('.move-down-btn')) return moveElement(todoEl, 'down');
+}
+
+function handleOnSubmit(event: SubmitEvent): void {
+  event.preventDefault();
+
+  const newTodo: ITodo = {
+    completed: false,
+    id: generateId(),
+    title: inputEl.value,
+  };
+
+  const newTodoEl = createNewTodoEl(newTodo);
+  todoListEl.insertAdjacentElement('afterbegin', newTodoEl);
+  inputEl.value = '';
+  updateMoveButtonState();
 }
 
 function moveElement(todoEl: HTMLElement, direction: 'up' | 'down'): void {
@@ -147,10 +126,9 @@ async function populateExistingTodos(): Promise<void> {
   renderLoadingSpinner();
 
   setTimeout(async () => {
-    const todos = await fetchTodos();
     removeLoadingSpinner();
 
-    todos.forEach((t) => {
+    todosList.getTodos().forEach((t) => {
       todoListEl.insertAdjacentElement('beforeend', createNewTodoEl(t));
     });
 
@@ -158,7 +136,7 @@ async function populateExistingTodos(): Promise<void> {
   }, 2000);
 }
 
-function renderLoadingSpinner() {
+function renderLoadingSpinner(): void {
   const loadingSpinnerEl = document.createElement('div');
   loadingSpinnerEl.classList.add('loader-wrapper');
   loadingSpinnerEl.innerHTML = `<div class="loader"></div>`;
@@ -166,7 +144,7 @@ function renderLoadingSpinner() {
   todoListEl.appendChild(loadingSpinnerEl);
 }
 
-function removeLoadingSpinner() {
+function removeLoadingSpinner(): void {
   const loadingSpinnerEl = document.querySelector<HTMLElement>('.loader-wrapper')!;
   todoListEl.removeChild(loadingSpinnerEl);
 }
