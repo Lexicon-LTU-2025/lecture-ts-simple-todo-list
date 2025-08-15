@@ -1,9 +1,10 @@
 import './css/style.css';
-import { dummyTodos } from './data';
+// import { dummyTodos } from './data';
 import { v4 as generateId } from 'uuid';
 
 // Use `import type` when importing interfaces or types to tell TS that they are only needed in development, so they won't be included in the compile JS and won't trigger unnecessary runtime imports.
 import type { ITodo } from './types';
+import { TodosKey } from './constants';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
@@ -93,14 +94,26 @@ function createNewTodoEl(todo: ITodo): HTMLElement {
 }
 
 async function fetchTodos(): Promise<ITodo[]> {
-  const res = await fetch('https://jsonplaceholder.typicode.com/todos');
+  const todosFromLS = localStorage.getItem(TodosKey);
 
-  if (res.ok === false) {
-    throw new Error('Todos could not be fetched');
+  if (todosFromLS === null) {
+    console.log('Todos from API');
+    const res = await fetch('https://jsonplaceholder.typicode.com/todos');
+
+    if (res.ok === false) {
+      throw new Error('Todos could not be fetched');
+    }
+
+    const todos = (await res.json()) as ITodo[];
+    const defaultTodos = todos.slice(0, 5);
+
+    localStorage.setItem(TodosKey, JSON.stringify(defaultTodos));
+    return defaultTodos;
   }
 
-  const todos = (await res.json()) as ITodo[];
-  return todos.slice(0, 5);
+  console.log('Todos from LS');
+  const parsedTodos = JSON.parse(todosFromLS) as ITodo[];
+  return parsedTodos;
 }
 
 function handleOnClick(event: MouseEvent): void {
