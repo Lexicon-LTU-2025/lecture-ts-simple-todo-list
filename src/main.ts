@@ -4,7 +4,6 @@ import { v4 as generateId } from 'uuid';
 
 // Use `import type` when importing interfaces or types to tell TS that they are only needed in development, so they won't be included in the compile JS and won't trigger unnecessary runtime imports.
 import type { ITodo } from './types';
-import { TodosKey } from './constants';
 import { TodoList } from './todoList.class';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -104,6 +103,8 @@ function handleOnSubmit(event: SubmitEvent): void {
     title: inputEl.value,
   };
 
+  todosList.add(newTodo);
+
   const newTodoEl = createNewTodoEl(newTodo);
   todoListEl.insertAdjacentElement('afterbegin', newTodoEl);
   inputEl.value = '';
@@ -150,6 +151,8 @@ function removeLoadingSpinner(): void {
 }
 
 function removeTodo(todoEl: HTMLElement): void {
+  todosList.remove(todoEl.id);
+
   todoListEl.removeChild(todoEl);
   updateMoveButtonState();
 }

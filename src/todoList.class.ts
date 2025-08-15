@@ -26,16 +26,21 @@ export class TodoList {
     }
   }
 
-  private saveToLocalStorage() {
-    localStorage.setItem(TodosKey, JSON.stringify(this.todos));
-  }
-
-  public add(todo: ITodo) {
+  public add(todo: ITodo): void {
     this.todos.unshift(todo);
     this.saveToLocalStorage();
   }
 
   public getTodos(): ITodo[] {
     return this.todos;
+  }
+
+  public remove(todoId: string): void {
+    this.todos = this.todos.filter((todo) => String(todo.id) !== todoId);
+    this.saveToLocalStorage();
+  }
+
+  private saveToLocalStorage(): void {
+    localStorage.setItem(TodosKey, JSON.stringify(this.todos));
   }
 }
